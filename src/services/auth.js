@@ -1,6 +1,34 @@
 import createHttpError from "http-errors";
 import { authCollection } from "../db/auth.js";
-export const getUser= async(email) =>{
+import jwt from 'jsonwebtoken';
+import { sessionCollection } from '../db/session.js';
+
+const ACCESS_TOKEN_EXPIRY = '15m';
+
+const REFRESH_TOKEN_EXPIRY = '30d';
+
+export const loginUser= async({email,password})=>{
+    const user = await authCollection.findOne({email});
+    if (!user || user.password !== password) {
+        throw createHttpError(401, 'Invalid email or password');
+    }
+
+    await sessionCollection.deleteMany({userId: user._id})
+
+    const accessToken= jwt.sign({userId:user._id},process.env.JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
+    const refreshToken= jwt.sign({userId: user._id}, process.env.JWT_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
+
+    await sessionCollection.create({
+        userId:user._id,
+        accessToken,
+        refreshToken,
+        accessTokenValidUntil: new Date(Date.now() + 15 * 60 * 1000), // 15 dakika
+        refreshTokenValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 gün
+    });
+
+    return {accessToken,refreshToken};
+}
+export const getUser= async(email) =>{  
     try{
         const userAuth = await authCollection.findOne({email:email}).toArray();
         return userAuth;

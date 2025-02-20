@@ -1,7 +1,8 @@
 import { Router } from "express";
 import ctrlWrapper from "../utils/ctrlWrapper";
-import { getAuthController } from "../controllers/auth";
+import { getAuthController, loginAuthController, loginUserController } from "../controllers/auth";
 const router = Router();
-
+//loginlerde sorun var
 router.post('/auth/register',ctrlWrapper(getAuthController));
-router.post('/auth/login',ctrlWrapper);
+router.post('/auth/login',ctrlWrapper(loginUserController));
+

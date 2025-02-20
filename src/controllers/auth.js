@@ -1,5 +1,20 @@
 import createHttpError from 'http-errors'
-import { getUser,createUser } from '../services/auth';
+import { getUser,createUser,loginUser} from '../services/auth';
+
+export const loginUserController =  async(req,res,next) =>{
+    try{
+        const {email, password} = req.body;
+        const {accessToken,refreshToken} =await loginUser({email, password});
+    
+        res.status(200).json({
+            status:200,
+            message:'Login successful',
+            data: {accessToken,refreshToken}
+        })
+    }catch(error){
+        next(createHttpError(error.status || 500, error.message));
+    }
+}
 export const getAuthController = async(req, res,next) =>{
     try{
         const {name, email, password} = req.body;
