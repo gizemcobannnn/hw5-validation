@@ -1,6 +1,6 @@
 import { Router } from "express";
 import ctrlWrapper from "../utils/ctrlWrapper";
-import { getAuthController, loginAuthController, loginUserController, refreshUserController, logoutAuthController} from "../controllers/auth";
+import { getAuthController, loginUserController, refreshUserController, logoutAuthController} from "../controllers/auth";
 import { authenticate } from "../middlewares/authenticate";
 const router = Router();
 //loginlerde sorun var

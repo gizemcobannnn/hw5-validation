@@ -68,14 +68,13 @@ export const loginAuthController = async(req,res,next)=>{
             return next(createHttpError(401, 'Invalid credentials'));
         }
 
-        const createUser = await createUser({email,password});
-        const usernopassword = {...createUser};
-        delete usernopassword.password;
+        const { accessToken, refreshToken } = await loginUser({ email, password }); // ✅ Doğru kullanım
+
 
         res.status(200).json({
             status:200,
             message: "Successfully logged in!",
-            data: usernopassword
+            data:  { accessToken, refreshToken }
         })
     }catch(e){
         createHttpError(500,e.message)
@@ -99,4 +98,4 @@ export const logoutAuthController = async(req,res,next) =>{
     }catch(e){
         next(createHttpError(e.status||500,e.message))
     }
-},
+}
