@@ -4,7 +4,7 @@
 // Bu, nesneye iki alan ekler: createdAt (oluşturulma tarihi) ve updatedAt (güncellenme tarihi); bunları manuel olarak eklemenize gerek yoktur.
 
 
-import { Schema, model} from 'mongoose';
+import { Schema, model, mongoose} from 'mongoose';
 
 const contactsSchema = new Schema(
   {
@@ -29,6 +29,8 @@ const contactsSchema = new Schema(
         required: true,
         enum: ['personal', 'home', 'other'],
     },
+
+      userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, 
 
   },
   {
