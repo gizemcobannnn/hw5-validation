@@ -1,5 +1,5 @@
 import createHttpError from 'http-errors'
-import { getUser,createUser,loginUser} from '../services/auth';
+import { getUser,createUser,loginUser, refreshUser} from '../services/auth';
 
 export const loginUserController =  async(req,res,next) =>{
     try{
@@ -8,11 +8,29 @@ export const loginUserController =  async(req,res,next) =>{
     
         res.status(200).json({
             status:200,
-            message:'Login successful',
+            message:"Successfully logged in an user!",
             data: {accessToken,refreshToken}
         })
     }catch(error){
         next(createHttpError(error.status || 500, error.message));
+    }
+}
+
+export const refreshUserController = async(req,res,next) =>{
+    try{
+        const {refreshtoken} = req.cookies;
+        if(!refreshtoken){
+            return next(createHttpError('401','No refresh token provided'));
+        }
+
+        const {accessToken} = await refreshUser({token:refreshUser})
+        res.status(200).json({
+            status: 200,
+            message:"Successfully refreshed a session!",
+            data:{accessToken}
+        })
+    }catch(e){
+        next(createHttpError(e.status||500,e.message));
     }
 }
 export const getAuthController = async(req, res,next) =>{

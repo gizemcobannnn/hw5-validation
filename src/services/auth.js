@@ -28,6 +28,28 @@ export const loginUser= async({email,password})=>{
 
     return {accessToken,refreshToken};
 }
+
+export const refreshUser= async({token})=>{
+    const session = await sessionCollection.findOne({refreshToken:token});
+    if (!session) {
+        throw createHttpError(401, 'Invalid or expired refresh token');
+    }
+
+    await sessionCollection.deleteMany({userId: session.userId});
+
+    const accessToken= jwt.sign({userId:session.userId},process.env.JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
+    const refreshToken= jwt.sign({userId: session.userId}, process.env.JWT_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
+
+    await sessionCollection.create({
+        userId:session.userId,
+        accessToken,
+        refreshToken,
+        accessTokenValidUntil: new Date(Date.now() + 15 * 60 * 1000), // 15 dakika
+        refreshTokenValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 gün
+    });
+
+    return {accessToken,refreshToken};
+} 
 export const getUser= async(email) =>{  
     try{
         const userAuth = await authCollection.findOne({email:email}).toArray();
