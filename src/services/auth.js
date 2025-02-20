@@ -68,3 +68,18 @@ export const createUser= async(userData)=>{
         createHttpError(e.status,e.message)
     }
 }
+
+export const logoutUser = async({token})=>{
+    try{
+        const session =await sessionCollection.findOne({refreshToken:token})
+        if(!session){
+            throw createHttpError(401, 'Invalid or expired refresh token');
+        }
+        await sessionCollection.deleteMany({refreshToken:token});
+
+    return { message: 'Successfully logged out!' };
+    
+    }catch(e){
+        throw createHttpError(e.status,e.message)
+    }
+}

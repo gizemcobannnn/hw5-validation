@@ -1,5 +1,5 @@
 import createHttpError from 'http-errors'
-import { getUser,createUser,loginUser, refreshUser} from '../services/auth';
+import { getUser,createUser,loginUser, refreshUser, logoutUser} from '../services/auth';
 
 export const loginUserController =  async(req,res,next) =>{
     try{
@@ -81,3 +81,22 @@ export const loginAuthController = async(req,res,next)=>{
         createHttpError(500,e.message)
     }
 }
+
+export const logoutAuthController = async(req,res,next) =>{
+    try{
+        const {refreshToken} = req.cookies;
+        if(!refreshToken){
+            next(createHttpError(400,"No refresh token provided')"));
+        }
+        await logoutUser({token:refreshToken});
+        res.clearCookie('refreshToken', { httpOnly: true, secure: true });
+
+        res.status(204 ).json({
+            status:204,
+            message:'logged out',
+        })
+
+    }catch(e){
+        next(createHttpError(e.status||500,e.message))
+    }
+},
