@@ -10,3 +10,4 @@ export const validateBody = (schema) => (req, res, next) => {
       next(error);
     });
 };
+export default validateBody;

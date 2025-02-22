@@ -1,9 +1,14 @@
-import Joi from 'joi';
+import {model,Schema} from 'mongoose';
 
-export const sessionSchema = Joi.object({
-    userId: Joi.string().required(),
-    accessToken: Joi.string().required(),
-    refreshToken: Joi.string().required(),
-    accessTokenValidUntil: Joi.date().required(),
-    refreshTokenValidUntil:Joi.date().required(),
-})
+const sessionSchema = new Schema({
+  userId: { type: Schema.Types.ObjectId, required: true, ref: 'users' },
+  accessToken: { type: String, required: true },
+  refreshToken: { type: String, required: true },
+  accessTokenValidUntil: { type: Date, required: true },
+  refreshTokenValidUntil: { type: Date, required: true }
+},
+{ timestamps: true, versionKey: false }
+);
+
+const sessionCollection = model('sessions', sessionSchema);
+export default sessionCollection; 

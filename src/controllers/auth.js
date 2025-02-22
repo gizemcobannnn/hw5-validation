@@ -1,39 +1,59 @@
 import createHttpError from 'http-errors'
-import { getUser,createUser,loginUser, refreshUser, logoutUser} from '../services/auth';
+import { getUser,createUser,loginUser, refreshUser, logoutUser} from '../services/auth.js';
+import { ONE_DAY } from '../constants/index.js';
 
-export const loginUserController =  async(req,res,next) =>{
-    try{
-        const {email, password} = req.body;
-        const {accessToken,refreshToken} =await loginUser({email, password});
-    
-        res.status(200).json({
-            status:200,
-            message:"Successfully logged in an user!",
-            data: {accessToken,refreshToken}
-        })
-    }catch(error){
-        next(createHttpError(error.status || 500, error.message));
-    }
-}
 
+export const loginUserController =  async(req,res) =>{
+        const session = await loginUser(req.body);
+      
+        res.cookie('refreshToken', session.refreshToken, {
+          httpOnly: true,
+          expires: new Date(Date.now() + ONE_DAY),
+        });
+        res.cookie('sessionId', session._id, {
+          httpOnly: true,
+          expires: new Date(Date.now() + ONE_DAY),
+        });
+      
+        res.json({
+          status: 200,
+          message: 'Successfully logged in an user!',
+          data: {
+            accessToken: session.accessToken,
+          },
+        });
+      };
+      
+  const setupSession = (res, session) => {
+    res.cookie('refreshToken', session.refreshToken, {
+      httpOnly: true,
+      expires: new Date(Date.now() + ONE_DAY),
+    });
+    res.cookie('sessionId', session._id, {
+      httpOnly: true,
+      expires: new Date(Date.now() + ONE_DAY),
+    });
+  };
 export const refreshUserController = async(req,res,next) =>{
     try{
-        const {refreshtoken} = req.cookies;
-        if(!refreshtoken){
-            return next(createHttpError('401','No refresh token provided'));
-        }
+      const session = await refreshUser({
+        sessionId: req.cookies.sessionId,
+        refreshToken: req.cookies.refreshToken,
+      });
 
-        const {accessToken} = await refreshUser({token:refreshUser})
+      
+      setupSession(res, session);
         res.status(200).json({
             status: 200,
             message:"Successfully refreshed a session!",
-            data:{accessToken}
+            data:{ accessToken: session.accessToken,}
+
         })
     }catch(e){
         next(createHttpError(e.status||500,e.message));
     }
 }
-export const getAuthController = async(req, res,next) =>{
+export const createAuthController = async(req, res,next) =>{
     try{
         const {name, email, password} = req.body;
         const user = await getUser(email);
@@ -58,44 +78,45 @@ export const getAuthController = async(req, res,next) =>{
 
 export const loginAuthController = async(req,res,next)=>{
     try{
-        const {email,password} = req.body;
+    const session = await loginUser(req.body);
 
-        const user = getUser(email);
-        if(!user){
-            return next(createHttpError(401, 'User not found'));
-        }
-        if (user.password !== password) {
-            return next(createHttpError(401, 'Invalid credentials'));
-        }
-
-        const { accessToken, refreshToken } = await loginUser({ email, password }); // ✅ Doğru kullanım
-
-
-        res.status(200).json({
-            status:200,
-            message: "Successfully logged in!",
-            data:  { accessToken, refreshToken }
-        })
-    }catch(e){
-        createHttpError(500,e.message)
+    res.cookie('refreshToken', session.refreshToken, {
+      httpOnly: true,
+      expires: new Date(Date.now() + ONE_DAY),
+    });
+    res.cookie('sessionId', session._id, {
+      httpOnly: true,
+      expires: new Date(Date.now() + ONE_DAY),
+    });
+  
+    res.json({
+      status: 200,
+      message: 'Successfully logged in an user!',
+      data: {
+        accessToken: session.accessToken,
+      },
+    });
+}catch(e){
+        next(createHttpError(500,e.message));
     }
 }
 
 export const logoutAuthController = async(req,res,next) =>{
-    try{
-        const {refreshToken} = req.cookies;
-        if(!refreshToken){
-            next(createHttpError(400,"No refresh token provided')"));
+    try {
+        const sessionId = req.cookies.sessionId; // Cookie'den alıyoruz
+
+        if (!sessionId) {
+            throw createHttpError(400, 'Session ID not found in cookies');
         }
-        await logoutUser({token:refreshToken});
-        res.clearCookie('refreshToken', { httpOnly: true, secure: true });
 
-        res.status(204 ).json({
-            status:204,
-            message:'logged out',
-        })
+        await logoutUser(sessionId);
 
-    }catch(e){
-        next(createHttpError(e.status||500,e.message))
+        // Cookie'leri temizle
+        res.clearCookie('sessionId');
+        res.clearCookie('refreshToken');
+
+        res.status(204).send();
+    } catch (e) {
+        next(createHttpError(e.status || 500, e.message));
     }
 }

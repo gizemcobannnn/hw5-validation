@@ -12,6 +12,9 @@ import pino from 'pino';
 import errorHandler from './middlewares/errorHandler.js';
 import notFoundHandler from './middlewares/notFoundHandler.js';
 import contactRouters from './routers/contacts.js';
+import authRouters from './routers/auth.js'
+import cookieParser from 'cookie-parser';
+
 
 
 
@@ -31,10 +34,12 @@ const setupServer = ()=>{
 
     server.use(express.json());
     server.use(cors());
+    server.use(cookieParser());
 
-    const PORT= Number(process.env.PORT || 3000 );
+    const PORT= Number(process.env.PORT || 4000 );
 
-    server.use('/',contactRouters);
+    server.use('/auth',authRouters)
+    server.use('/contacts',contactRouters);
 
 
 server.use(errorHandler);
