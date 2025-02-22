@@ -6,7 +6,7 @@ export const authenticate = async (req, res, next) => {
   const authHeader = req.get('Authorization');
 
   if (req.path === '/auth/register' || req.path === '/auth/login') {
-    return next(); // Bu route'larda token kontrolü yapma
+    return next(); 
 }
 
   if (!authHeader) {

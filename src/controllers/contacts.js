@@ -1,9 +1,11 @@
 //server.jsdki controllerkoduburaya tasinvak
 import createHttpError from "http-errors";
-import { createContact,updateContact,deleteContact, getContactById, getAllContacts } from "../services/contacts.js"
+import { updateContact,deleteContact, getContactById, getAllContacts } from "../services/contacts.js"
 import { parsePaginationParams } from "../utils/parsePaginationParams.js";
 import { parseSortParams } from "../utils/parseSortParams.js";
 import { parseFilterParams } from "../utils/parseFilterParams.js";
+import { ContactsCollection } from "../db/models/contacts.js";
+import mongoose from "mongoose";
 export const getContactsController = async(req,res)=>{
     
     try{
@@ -51,47 +53,53 @@ export const getContactController = async(req,res,next)=>{
     try{
         const {contactId} = req.params;
         const contact = await getContactById(contactId);
+        if(!contact){
+            return next(createHttpError(404, "Contact not found"));
     
+        }
         res.status(200).json({
             status: 200,
             message: `Successfully found contact with id ${contactId} !`,
             data:contact
         });
-    
-        if(!contact){
-            next(createHttpError(404, "Contact not found"));
-            res.status(404).json(
-                {
-                    status: 404,
-                    message: "Contact not found"
-                }
-            );
-            return;
-        }
+        
     }catch(error){
         res.status(500).json({
             status:500,
-            data: error.message,
-            message:"server error",
+            message:error.message
         })
     }
 
 
 };
 
-export const createContactController = async(req,res)=>{
+export const createContactController = async(req,res,next)=>{
 
-    const { name, email, phone } = req.body;
-    const userId = req.user._id;
+try{
+    const { name, phoneNumber, email, isFavourite, contactType, userId, parentId } = req.body;
 
-    const newContact = await createContact( name, email, phone, userId,);
-    
+    const newContact = new ContactsCollection({
+      name,
+      phoneNumber,
+      email,
+      isFavourite,
+      contactType,
+      userId: new mongoose.Types.ObjectId(userId),
+      parentId: new mongoose.Types.ObjectId(parentId),
+    });
+
+    await newContact.save();
     
     res.status(201).json({
         status: 201,
         message: "Successfully created a contact!",
         data: newContact,
     })
+}catch(e){
+    next(createHttpError(500, e.message));
+
+}
+
 }
 
 export const patchContactController  = async(req,res,next)=>{

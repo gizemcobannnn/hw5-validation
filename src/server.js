@@ -16,8 +16,6 @@ import authRouters from './routers/auth.js'
 import cookieParser from 'cookie-parser';
 
 
-
-
 const setupServer = ()=>{
     const server = express();
 
@@ -35,11 +33,12 @@ const setupServer = ()=>{
     server.use(express.json());
     server.use(cors());
     server.use(cookieParser());
-
+    server.use('/',authRouters);
+    server.use('/',contactRouters);
+    
     const PORT= Number(process.env.PORT || 4000 );
 
-    server.use('/auth',authRouters)
-    server.use('/contacts',contactRouters);
+
 
 
 server.use(errorHandler);

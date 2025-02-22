@@ -32,8 +32,16 @@ export const getContactById = async (contactId) => {
   return contact; 
 };
 
-export const createContact = async(payload)=>{
-  const contact = await ContactsCollection.create(payload);
+export const createContact = async(name, email, phoneNumber, userId, parentId, isFavourite, contactType)=>{
+  const contact = await ContactsCollection.create({
+    name,
+    email,
+    phoneNumber,
+    userId,
+    parentId,
+    isFavourite,
+    contactType
+  });
   return contact;
 };
 

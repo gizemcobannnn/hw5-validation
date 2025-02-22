@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
 import { FIFTEEN_MINUTES, ONE_DAY } from "../constants/index.js";
 import { randomBytes } from 'crypto';
-
+import mongoose from 'mongoose';
 
 
 dotenv.config();
@@ -31,6 +31,7 @@ export const loginUser= async(payload)=>{
     const accessToken= jwt.sign({userId:user._id},process.env.JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
     const refreshToken= jwt.sign({userId: user._id}, process.env.JWT_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
 
+    
     const session = await sessionCollection.create({
         userId: user._id,
         accessToken,
@@ -40,9 +41,7 @@ export const loginUser= async(payload)=>{
     });
     console.log("Created session:", session); 
 
-    return {
-        session
-    };
+    return session;
 }
 
 const createSession = () => {
@@ -57,11 +56,16 @@ const createSession = () => {
     };
   };
 export const refreshUser= async({ sessionId, refreshToken })=>{
-    const session = await sessionCollection.findOne({_id: sessionId, refreshToken});
-    if (!session) {
-        throw createHttpError(401, 'Session not found');
-      }
 
+try{
+    const objectId = mongoose.Types.ObjectId.createFromHexString(sessionId);
+
+    const session = await sessionCollection.findOne({ _id: objectId, refreshToken});
+
+    if (!session) {
+        throw createHttpError(404, 'Session not found');
+      }
+      console.log("Found Session:", session);
     const isSessionTokenExpired =
     new Date() > new Date(session.refreshTokenValidUntil);
 
@@ -71,12 +75,15 @@ export const refreshUser= async({ sessionId, refreshToken })=>{
 
     const newSession = createSession();
 
-    await sessionCollection.deleteOne({ _id: sessionId, refreshToken });
+    await sessionCollection.deleteOne({ _id: objectId, refreshToken });
 
     return await sessionCollection.create({
         userId:session.userId,
         ...newSession,
     });
+}catch(e){
+    throw createHttpError(e.status||500, e.message);
+}
 
 } 
 export const getUser= async(email) =>{  
@@ -111,7 +118,7 @@ try {
         throw createHttpError(400, 'Session ID is required');
     }
 
-    const session = await sessionCollection.findOne({ _id: sessionId });
+    const session = await sessionCollection.findById(new mongoose.Types.ObjectId(sessionId));
 
     if (!session) {
         throw createHttpError(401, 'Session not found');

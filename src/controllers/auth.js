@@ -40,8 +40,9 @@ export const refreshUserController = async(req,res,next) =>{
         sessionId: req.cookies.sessionId,
         refreshToken: req.cookies.refreshToken,
       });
-
-      
+      console.log(session)
+      console.log("Cookies:", req.cookies);
+     
       setupSession(res, session);
         res.status(200).json({
             status: 200,
@@ -79,12 +80,13 @@ export const createAuthController = async(req, res,next) =>{
 export const loginAuthController = async(req,res,next)=>{
     try{
     const session = await loginUser(req.body);
+    console.log(session._id);
 
     res.cookie('refreshToken', session.refreshToken, {
       httpOnly: true,
       expires: new Date(Date.now() + ONE_DAY),
     });
-    res.cookie('sessionId', session._id, {
+    res.cookie('sessionId', session._id.toString(), {
       httpOnly: true,
       expires: new Date(Date.now() + ONE_DAY),
     });
@@ -104,7 +106,11 @@ export const loginAuthController = async(req,res,next)=>{
 export const logoutAuthController = async(req,res,next) =>{
     try {
         const sessionId = req.cookies.sessionId; // Cookie'den alıyoruz
+        console.log("Session ID:", sessionId);   // Logla
 
+        if (!sessionId) {
+            throw createHttpError(400, 'Session ID is missing');
+        }
         if (!sessionId) {
             throw createHttpError(400, 'Session ID not found in cookies');
         }
