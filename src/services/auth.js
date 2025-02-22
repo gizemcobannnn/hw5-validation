@@ -3,7 +3,7 @@ import userCollection from "../db/models/user.js";
 import jwt from 'jsonwebtoken';
 import sessionCollection from '../db/models/session.js';
 import dotenv from 'dotenv';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { FIFTEEN_MINUTES, ONE_DAY } from "../constants/index.js";
 import { randomBytes } from 'crypto';
 import mongoose from 'mongoose';
