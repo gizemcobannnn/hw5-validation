@@ -1,7 +1,6 @@
 import createHttpError from 'http-errors'
-import { getUser,createUser,loginUser, refreshUser, logoutUser} from '../services/auth.js';
+import { getUser,createUser,loginUser, refreshUser, logoutUser, requestResetToken, resetPassword} from '../services/auth.js';
 import { ONE_DAY } from '../constants/index.js';
-
 
 export const loginUserController =  async(req,res) =>{
         const session = await loginUser(req.body);
@@ -126,3 +125,24 @@ export const logoutAuthController = async(req,res,next) =>{
         next(createHttpError(e.status || 500, e.message));
     }
 }
+
+
+export const requestResetEmailController = async (req, res) => {
+  await requestResetToken(req.body.email);
+  res.json({
+    status: 200,
+    message: "Reset password email has been successfully sent.",
+    data: {}
+});
+};
+
+
+
+export const resetPasswordController = async (req, res) => {
+  await resetPassword(req.body);
+  res.json({
+    message: 'Password was successfully reset!',
+    status: 200,
+    data: {},
+  });
+};
