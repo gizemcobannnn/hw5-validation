@@ -13,8 +13,8 @@ const router  = Router();
 router.use(authenticate);
 router.get('/contacts', checkRoles(ROLES.ADMIN,ROLES.PARENT),ctrlWrapper(getContactsController));
 router.get('/contacts/:contactId', checkRoles(ROLES.ADMIN,ROLES.PARENT), isValidId, ctrlWrapper(getContactController));
-router.post('/contacts', checkRoles(ROLES.ADMIN,ROLES.PARENT),upload.single('photo'), validateBody(contactSchema), ctrlWrapper(createContactController));
-router.patch('/contacts/:contactId',checkRoles(ROLES.ADMIN,ROLES.PARENT), validateBody(contactSchema), isValidId, ctrlWrapper(patchContactController));
+router.post('/contacts', checkRoles(ROLES.ADMIN,ROLES.PARENT),upload.single('coffee'), validateBody(contactSchema), ctrlWrapper(createContactController));
+router.patch('/contacts/:contactId',checkRoles(ROLES.ADMIN,ROLES.PARENT),upload.single('coffee'), validateBody(contactSchema), isValidId, ctrlWrapper(patchContactController));
 router.delete('/contacts/:contactId',  checkRoles(ROLES.ADMIN,ROLES.PARENT),isValidId, ctrlWrapper(deleteContactController));
 
 export default router;

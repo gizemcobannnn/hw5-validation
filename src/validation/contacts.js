@@ -51,7 +51,8 @@ export const contactSchema = Joi.object({
                 'string.empty': 'UserId cannot be empty.',
                 'any.required': 'UserId is required.'
             }),
-    parentId: Joi.string().required()
+    parentId: Joi.string().required(),
+    photo: Joi.string().required(),
 
 });
 
