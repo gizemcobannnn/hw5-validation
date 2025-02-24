@@ -15,6 +15,7 @@ import contactRouters from './routers/contacts.js';
 import authRouters from './routers/auth.js'
 import cookieParser from 'cookie-parser';
 import { UPLOAD_DIR } from './constants/index.js';
+import { swaggerDocs } from './middlewares/swaggerDocs.js';
 
 const setupServer = ()=>{
     const server = express();
@@ -44,6 +45,7 @@ const setupServer = ()=>{
 server.use(errorHandler);
 server.use(notFoundHandler);
 server.use('/uploads', express.static(UPLOAD_DIR));
+server.use('/api-docs', swaggerDocs());
 
 server.listen(PORT,()=>{
     logger.info(`Server is running on port ${PORT}`);
@@ -51,5 +53,4 @@ server.listen(PORT,()=>{
 }
 
 export default setupServer;
-
 
