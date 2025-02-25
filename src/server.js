@@ -34,8 +34,14 @@ const setupServer = ()=>{
     server.use(express.json());
     server.use(cors());
     server.use(cookieParser());
+
+    server.use('/api-docs', swaggerDocs());
+
     server.use('/',authRouters);
     server.use('/',contactRouters);
+
+    server.use('/uploads', express.static(UPLOAD_DIR));
+
     
     const PORT= Number(process.env.PORT || 4000 );
 
@@ -44,8 +50,7 @@ const setupServer = ()=>{
 
 server.use(errorHandler);
 server.use(notFoundHandler);
-server.use('/uploads', express.static(UPLOAD_DIR));
-server.use('/api-docs', swaggerDocs());
+
 
 server.listen(PORT,()=>{
     logger.info(`Server is running on port ${PORT}`);

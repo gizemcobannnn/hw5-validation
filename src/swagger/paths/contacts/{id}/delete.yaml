@@ -1,0 +1,18 @@
+parameters:
+  - name: id
+    in: path
+    required: true
+    schema:
+      type: string
+
+operationId: deleteContactById
+summary: Delete contact by ID
+description: Delete a contact by their ID.
+security:
+  - bearerAuth: []
+
+responses:
+  '200':
+    description: Successful operation
+  '404':
+    description: Contact not found

@@ -7,9 +7,10 @@ import { parseFilterParams } from "../utils/parseFilterParams.js";
 import { ContactsCollection } from "../db/models/contacts.js";
 import mongoose from "mongoose";
 import { saveFileToCloudinary } from '../utils/saveFileToCloudinary.js';
-import { env } from '../utils/env.js';
+import dotenv from 'dotenv';
+import {saveFileToUploadDir} from '../utils/saveFileToUploadDir.js'
 
-
+dotenv.config();
 
 export const getContactsController = async(req,res)=>{
     
@@ -107,21 +108,6 @@ try{
 
 }
 
-export const patchContactController  = async(req,res,next)=>{
-    const {contactId} = req.params;
-    const result = await updateContact(contactId, req.body);
-
-    if(!result){
-        next(createHttpError(404,"Not found"));
-        return;
-    }
-
-    res.status(200).json({
-        status: 200,
-	    message: "Successfully patched a contact!",
-	    data: result.contact,
-    })
-}
 
 
 export const deleteContactController = async(req,res,next)=>{
@@ -173,20 +159,20 @@ export const patchContactController = async (req, res, next) => {
 
 
 export const patchStudentController = async (req, res, next) => {
-  const { studentId } = req.params;
+  const { contactId } = req.params;
   const photo = req.file;
 
   let photoUrl;
 
   if (photo) {
-    if (env('ENABLE_CLOUDINARY') === 'true') {
+    if (process.env.ENABLE_CLOUDINARY === 'true') {
       photoUrl = await saveFileToCloudinary(photo);
     } else {
       photoUrl = await saveFileToUploadDir(photo);
     }
   }
 
-  const result = await updateStudent(studentId, {
+  const result = await updateContact(contactId, {
     ...req.body,
     photo: photoUrl,
   });
