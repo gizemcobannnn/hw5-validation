@@ -7,13 +7,11 @@ import bcrypt from 'bcryptjs';
 import { FIFTEEN_MINUTES, ONE_DAY } from "../constants/index.js";
 import { randomBytes } from 'crypto';
 import mongoose from 'mongoose';
-import { SMTP } from '../constants/index.js';
-
 import { sendEmail } from '../utils/sendMail.js';
 import handlebars from 'handlebars';
 import path from 'node:path';
 import fs from 'node:fs/promises';
-
+import { TEMPLATES_DIR } from "../constants/index.js";
 
 
 dotenv.config();
@@ -143,7 +141,7 @@ try {
 
 
 export const requestResetToken = async (email) => {
-  const user = await userCollection.findOne({email});
+  const user = await userCollection.findOne({ email });
   if (!user) {
     throw createHttpError(404, 'User not found');
   }
@@ -157,11 +155,14 @@ export const requestResetToken = async (email) => {
       expiresIn: '15m',
     },
   );
- console.log(resetToken)
-  const TEMPLATES_DIR = path.resolve(process.cwd(), process.env.TEMPLATES_DIR,'reset-password-email.html');
+
+  const resetPasswordTemplatePath = path.join(
+    TEMPLATES_DIR,
+    'reset-password-email.html',
+  );
 
   const templateSource = (
-    await fs.readFile(TEMPLATES_DIR)
+    await fs.readFile(resetPasswordTemplatePath)
   ).toString();
 
   const template = handlebars.compile(templateSource);
@@ -170,14 +171,14 @@ export const requestResetToken = async (email) => {
     link: `${process.env.APP_DOMAIN}/reset-password?token=${resetToken}`,
   });
 
+
   await sendEmail({
-    from: SMTP.SMTP_FROM,
+    from: process.env.SMTP_FROM,
     to: email,
     subject: 'Reset your password',
-    html,
+    html
   });
 };
-
 
 export const resetPassword = async (payload) => {
     let entries;

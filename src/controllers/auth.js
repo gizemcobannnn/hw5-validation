@@ -128,12 +128,26 @@ export const logoutAuthController = async(req,res,next) =>{
 
 
 export const requestResetEmailController = async (req, res) => {
-  await requestResetToken(req.body.email);
-  res.json({
-    status: 200,
-    message: "Reset password email has been successfully sent.",
-    data: {}
-});
+  const { to, subject, text } = req.body;
+
+  if (!to || !subject || !text) {
+    return res.status(400).json({ message: 'Missing required fields' });
+  }
+
+  try {
+    const mailOptions = {
+      from: process.env.SMTP_USER, // Gönderen e-posta adresi
+      to,
+      subject,
+      text,
+    };
+
+    await requestResetToken(mailOptions);
+    res.status(200).json({ message: 'Reset password email has been successfully sent.'});
+  } catch (error) {
+    res.status(500).json({ message: 'Email sending failed', error: error.message });
+  }
+
 };
 
 
