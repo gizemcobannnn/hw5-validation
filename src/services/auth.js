@@ -12,8 +12,8 @@ import handlebars from 'handlebars';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import { TEMPLATES_DIR } from "../constants/index.js";
-
-
+import {SMTP} from '../constants/index.js'
+import {env} from '../utils/env.js'
 dotenv.config();
 
 const ACCESS_TOKEN_EXPIRY = '15m';
@@ -173,7 +173,7 @@ export const requestResetToken = async (email) => {
 
 
   await sendEmail({
-    from: process.env.SMTP_FROM,
+    from: env(SMTP.SMTP_FROM),
     to: email,
     subject: 'Reset your password',
     html

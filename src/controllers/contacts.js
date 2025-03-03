@@ -9,6 +9,7 @@ import mongoose from "mongoose";
 import { cloudPhoto } from '../utils/cloudnary.js'; // Cloudinary kullanıyorsan ekle
 import { saveFileToUploadDir } from '../utils/saveFileToUploadDir.js';
 import { saveFileToCloudinary } from "../utils/saveFileToCloudinary.js";
+import { env } from "../utils/env.js";
 
 export const getContactsController = async(req,res)=>{
     
@@ -138,7 +139,7 @@ export const patchContactController = async (req, res, next) => {
       let photoUrl;
     
         if(photo) {
-            if (process.env.ENABLE_CLOUDINARY === "true") {
+            if (env('ENABLE_CLOUDINARY') === 'true') {
                 photoUrl = await saveFileToCloudinary(photo);
             } else {
               photoUrl = await saveFileToUploadDir(photo);

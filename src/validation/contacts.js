@@ -44,15 +44,7 @@ export const contactSchema = Joi.object({
             'string.empty': 'Contact type cannot be empty.',
             'any.only': 'Contact type must be either "work" or "personal".',
             'any.required': 'Contact type is required.'
-        }),
-    userId:Joi.string().required()
-            .messages({
-                'string.base': 'UserId must be a text.',
-                'string.empty': 'UserId cannot be empty.',
-                'any.required': 'UserId is required.'
-            }),
-    parentId: Joi.string().required(),
-    photo: Joi.string().optional(),
+        })
 
 });
 
@@ -62,5 +54,4 @@ export const updateContactSchema =  Joi.object({
     email:Joi.string().min(3).max(20),
     isFavourite:Joi.boolean(),
     contactType:Joi.string().min(3).max(20),
-    photo: Joi.string(),
 })

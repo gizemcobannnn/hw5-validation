@@ -1,11 +1,3 @@
-// express sunucusunun çalışma mantığını içerecek.
-//setupServer adında bir fonksiyon oluşturun; bu fonksiyon express sunucusunu oluşturacak.
-//  Bu fonksiyon şunları içermelidir:
-//express() çağrısıyla sunucunun oluşturulması
-//cors ve pino logger'ının ayarlanması
-//Mevcut olmayan rotalar için 404 hata durumu ve uygun mesaj döndürülmesi.{message: 'Not found'}
-// Sunucunun, PORT ortam değişkeni aracılığıyla belirtilen veya belirtilmemişse 3000 numaralı portta başlatılması
-
 import express from 'express';
 import cors from 'cors';
 import pino from 'pino';
@@ -34,16 +26,14 @@ const setupServer = ()=>{
     // Middleware'ler
     server.use(pinoHttp({ logger }));
     server.use(cors());
-    server.use(express.json());
-    server.use(express.urlencoded({ extended: true }));
+    server.use(express.json({type: ['application/json', 'application/vnd.api+json'],}));
     server.use(cookieParser());
-
     server.use('/uploads', express.static(UPLOAD_DIR));
-
+    server.use(express.urlencoded({ extended: true }));
     server.use('/',authRouters);
     server.use('/',contactRouters);
-    server.use(errorHandler);
     server.use(notFoundHandler);
+    server.use(errorHandler);
 
 server.listen(PORT,()=>{
     logger.info(`Server is running on port ${PORT}`);
