@@ -52,7 +52,7 @@ export const contactSchema = Joi.object({
                 'any.required': 'UserId is required.'
             }),
     parentId: Joi.string().required(),
-    photo: Joi.string().required(),
+    photo: Joi.string().optional(),
 
 });
 
@@ -62,4 +62,5 @@ export const updateContactSchema =  Joi.object({
     email:Joi.string().min(3).max(20),
     isFavourite:Joi.boolean(),
     contactType:Joi.string().min(3).max(20),
+    photo: Joi.string(),
 })

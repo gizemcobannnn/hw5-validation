@@ -1,17 +1,23 @@
-import cloudinary from 'cloudinary';
-import { env } from './env.js';
-import { CLOUDINARY } from '../constants/index.js';
+import { v2 as cloudinary } from 'cloudinary';
 import fs from 'fs/promises'
+import dotenv from 'dotenv'
 
-cloudinary.v2.config({
+dotenv.config();
+
+cloudinary.config({
   secure: true,
-  cloud_name: env(CLOUDINARY.CLOUD_NAME),
-  api_key: env(CLOUDINARY.API_KEY),
-  api_secret: env(CLOUDINARY.API_SECRET),
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 export const saveFileToCloudinary = async (file) => {
-  const response = await cloudinary.v2.uploader.upload(file.path);
-  await fs.unlink(file.path);
-  return response.secure_url;
+  try {
+    const response = await cloudinary.uploader.upload(file.path);
+    await fs.unlink(file.path); // Başarılı yükleme sonrası dosyayı kaldır
+    return response.secure_url;
+  } catch (error) {
+    console.error('Cloudinary upload failed:', error);
+    throw new Error('File upload failed'); // Hata fırlat
+  }
 };
