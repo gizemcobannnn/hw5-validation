@@ -12,19 +12,12 @@
   "servers": [
     {
       "url": "http://localhost:3000"
-    },
-    {
-      "url": "https://example.com/api/v1"
     }
   ],
   "tags": [
     {
       "name": "Contacts",
       "description": "Operations about contacts."
-    },
-    {
-      "name": "Auth",
-      "description": "Auth operations."
     }
   ],
   "paths": {
@@ -282,6 +275,9 @@
             }
           }
         ],
+        "tags": [
+          "Contacts"
+        ],
         "operationId": "getContactById",
         "summary": "Get contact by ID",
         "description": "Returns a contact by their ID.",
@@ -300,6 +296,9 @@
         }
       },
       "patch": {
+        "tags": [
+          "Contacts"
+        ],
         "parameters": [
           {
             "name": "id",
@@ -328,6 +327,9 @@
         }
       },
       "delete": {
+        "tags": [
+          "Contacts"
+        ],
         "parameters": [
           {
             "name": "id",

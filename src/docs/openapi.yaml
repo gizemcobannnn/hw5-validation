@@ -11,25 +11,40 @@ info:
 tags:
   - name: Contacts
     description: Operations about contacts.
-  - name: Auth
-    description: Auth operations.
 servers:
   - url: http://localhost:3000
-  - url: https://example.com/api/v1
 paths:
   /contacts:
     get:
       security:
         - bearerAuth: []
+      tags:
+        - Contacts
       $ref: ../swagger/paths/contacts/get.yaml 
     post:
+      security:
+        - bearerAuth: []
+      tags:
+        - Contacts
       $ref: ../swagger/paths/contacts/post.yaml 
   /contacts/{id}:
     get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Contacts
       $ref: ../swagger/paths/contacts/{id}/get.yaml
     patch:
+      security:
+        - bearerAuth: []
+      tags:
+        - Contacts
       $ref: ../swagger/paths/contacts/{id}/patch.yaml
     delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - Contacts
       $ref: ../swagger/paths/contacts/{id}/delete.yaml
 components:
   securitySchemes:
