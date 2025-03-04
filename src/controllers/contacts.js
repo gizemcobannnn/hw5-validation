@@ -1,16 +1,12 @@
 //server.jsdki controllerkoduburaya tasinvak
 import createHttpError from "http-errors";
-import { updateContact,deleteContact, getContactById, getAllContacts } from "../services/contacts.js"
+import { updateContact,deleteContact, getContactById, getAllContacts, createContact } from "../services/contacts.js"
 import { parsePaginationParams } from "../utils/parsePaginationParams.js";
 import { parseSortParams } from "../utils/parseSortParams.js";
 import { parseFilterParams } from "../utils/parseFilterParams.js";
-import { ContactsCollection } from "../db/models/contacts.js";
-import mongoose from "mongoose";
-import { cloudPhoto } from '../utils/cloudnary.js'; // Cloudinary kullanıyorsan ekle
 import { saveFileToUploadDir } from '../utils/saveFileToUploadDir.js';
 import { saveFileToCloudinary } from "../utils/saveFileToCloudinary.js";
 import { env } from "../utils/env.js";
-
 export const getContactsController = async(req,res)=>{
     
     try{
@@ -81,31 +77,23 @@ export const getContactController = async(req,res,next)=>{
 export const createContactController = async(req,res,next)=>{
 
 try{
-    const { name, phoneNumber, email, isFavourite, contactType, userId, parentId } = req.body;
     let photoUrl = '';
+    const photo = req.file;
+    if (photo) {
+        if (env('ENABLE_CLOUDINARY') === 'true') {
+          photoUrl = await saveFileToCloudinary(photo);
+        } else {
+          photoUrl = await saveFileToUploadDir(photo);
+        }
+      }
 
-    if (req.file) {
-      const result = await cloudPhoto(req.file.path); // Cloudinary için
-      photoUrl = result.secure_url;
-  }
-
-    const newContact = new ContactsCollection({
-      name,
-      phoneNumber,
-      email,
-      isFavourite,
-      contactType,
-      userId: new mongoose.Types.ObjectId(userId),
-      parentId: new mongoose.Types.ObjectId(parentId),
-      photo: photoUrl
-    });
-
-    await newContact.save();
+    const newUser = { ...req.body, photoUrl, userId: req.user._id };
+    const contact = await createContact(newUser);
     
     res.status(201).json({
         status: 201,
         message: "Successfully created a contact!",
-        data: newContact,
+        data: contact,
     })
 }catch(e){
     next(createHttpError(500, e.message));
@@ -136,19 +124,19 @@ export const patchContactController = async (req, res, next) => {
     try{
         const { contactId } = req.params;
         const photo = req.file;
-      let photoUrl;
-    
-        if(photo) {
-            if (env('ENABLE_CLOUDINARY') === 'true') {
-                photoUrl = await saveFileToCloudinary(photo);
-            } else {
-              photoUrl = await saveFileToUploadDir(photo);
-            }
-      }
-    
-        const result = await updateContact(contactId, {
+        const userId = req.user._id;
+        let photoUrl;
+      
+        if (photo) {
+          if (env('ENABLE_CLOUDINARY') === 'true') {
+            photoUrl = await saveFileToCloudinary(photo);
+          } else {
+            photoUrl = await saveFileToUploadDir(photo);
+          }
+        }
+        const result = await updateContact(contactId, userId, {
           ...req.body,
-          photo: photoUrl,
+          photoUrl,
         });
       
         if (!result) {
@@ -158,10 +146,12 @@ export const patchContactController = async (req, res, next) => {
       
         res.json({
           status: 200,
+          url:photoUrl,
           message: `Successfully patched a contact!`,
           data: result.contact,
         });
     }catch(error){
+        console.log(error.message)
         next(error);
     }
 

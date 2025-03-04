@@ -1,12 +1,15 @@
 import { v2 as cloudinary } from 'cloudinary';
+import dotenv from 'dotenv';
+dotenv.config();
 
 export const cloudPhoto = async function () {
+    console.log("Api Key:", process.env.API_KEY)
     try {
         // Configuration
         cloudinary.config({
             cloud_name: 'dlexewh9h',
-            api_key: process.env.CLOUDINARY_API_KEY,
-            api_secret: process.env.CLOUDINARY_API_SECRET, // Güvenlik için .env dosyasından al
+            api_key: process.env.API_KEY,
+            api_secret: process.env.API_SECRET, // Güvenlik için .env dosyasından al
         });
 
         // Upload an image

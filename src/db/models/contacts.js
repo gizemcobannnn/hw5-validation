@@ -7,8 +7,6 @@ const contactSchema = new mongoose.Schema({
     email: { type: String, required: true },
     isFavourite: { type: Boolean, required: true },
     contactType: { type: String, enum: ['work', 'personal'], required: true },
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    parentId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     photo: { type: String },
   },
   {
