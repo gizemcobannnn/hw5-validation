@@ -141,20 +141,32 @@ try {
 
 
 export const requestResetToken = async (email) => {
+  console.log(`🔍 Reset token isteği alındı: ${email}`);
+
+ try{
   const user = await userCollection.findOne({ email });
   if (!user) {
     throw createHttpError(404, 'User not found');
   }
+  console.log(`✅ Kullanıcı bulundu: ${user.email}`);
+  console.log("JWT Secret:", process.env.JWT_SECRET);
+
   const resetToken = jwt.sign(
     {
-      sub: user._id,
+      sub: user._id.toString(), // ObjectId'yi string yap
       email,
     },
-    process.env.JWT_SECRET,
+    process.env.JWT_SECRET, // Güvenli bir secret kullan
     {
       expiresIn: '15m',
-    },
+      algorithm: 'HS256', // Algoritmayı açıkça belirt
+    }
   );
+  console.log(process.env.JWT_SECRET);
+  const decoded = jwt.verify(resetToken, process.env.JWT_SECRET);
+  console.log("Decoded Token:", decoded);
+
+  console.log(`🔑 Token oluşturuldu: ${resetToken}`);
 
   const resetPasswordTemplatePath = path.join(
     TEMPLATES_DIR,
@@ -164,12 +176,15 @@ export const requestResetToken = async (email) => {
   const templateSource = (
     await fs.readFile(resetPasswordTemplatePath)
   ).toString();
+  console.log(`Şablon dosyası başarıyla okundu. ${templateSource}`);
+
 
   const template = handlebars.compile(templateSource);
   const html = template({
     name: user.name,
-    link: `${process.env.APP_DOMAIN}/reset-password?token=${resetToken}`,
+    link: `${process.env.APP_DOMAIN}/auth/reset-password?token=${resetToken}`,
   });
+  console.log(`📧 E-posta içeriği hazırlandı. Alıcı: ${email}`);
 
 
   await sendEmail({
@@ -178,6 +193,13 @@ export const requestResetToken = async (email) => {
     subject: 'Reset your password',
     html
   });
+
+  console.log("✅ E-posta gönderildi!");
+
+ }catch(e){
+  console.log(e.message)
+ }
+
 };
 
 export const resetPassword = async (payload) => {
@@ -205,5 +227,9 @@ export const resetPassword = async (payload) => {
       { _id: user._id },
       { password: encryptedPassword },
     );
+
+    const session = await sessionCollection.findOne({ userId: user._id }).exec();
+    console.log(session);
+    if (session !== null) logoutUser(session._id);
   };
   
